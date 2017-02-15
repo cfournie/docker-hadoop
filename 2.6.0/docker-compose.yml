@@ -21,3 +21,16 @@ secondarynamenode:
         - "50090:50090"
     links:
         - namenode:hdfs-namenode
+
+yarn:
+    image: gelog/hadoop
+    command: /usr/local/bin/start-yarn.sh
+    ports:
+        - "8088:8088"
+        - "8042:8042"
+    links:
+        - datanode:hdfs-datanode1
+        - namenode:hdfs-namenode
+    volumes:
+        - $HOME/data/hadoop/hdfs:/data
+    hostname: yarn
