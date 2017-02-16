@@ -17,8 +17,20 @@
 <!-- Put site-specific property overrides in this file. -->
 
 <configuration>
+  
 	<property>
 		<name>fs.default.name</name>
 		<value>hdfs://hdfs-namenode:9000</value>
 	</property>
+
+    <!-- OOZIE proxy user setting -->
+    <property>
+      <name>hadoop.proxyuser.oozie.groups</name>
+      <value>*</value>
+    </property>
+    <property>
+      <name>hadoop.proxyuser.oozie.hosts</name>
+      <value>*</value>
+    </property>
+
 </configuration>

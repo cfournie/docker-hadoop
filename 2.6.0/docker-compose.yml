@@ -1,36 +1,77 @@
-namenode:
-    image: gelog/hadoop
-    ports: 
-        - "50070:50070"
-    command: hdfs namenode
-    hostname: hdfs-namenode
+version: '2'
+services:
+    namenode:
+        image: cfournie/oozie
+        ports: 
+            - "50070:50070"
+        command: hdfs namenode
+        hostname: hdfs-namenode
 
-datanode:
-    image: gelog/hadoop
-    command: hdfs datanode
-    ports:
-# The host port is randomly assigned by Docker, to allow scaling to multiple DataNodes on the same host
-        - "50075"
-    links:
-        - namenode:hdfs-namenode
+    datanode:
+        image: cfournie/oozie
+        command: hdfs datanode
+        ports:
+    # The host port is randomly assigned by Docker, to allow scaling to multiple DataNodes on the same host
+            - "50075"
+        links:
+            - namenode:hdfs-namenode
+        depends_on:
+          - secondarynamenode
+          - namenode
 
-secondarynamenode:
-    image: gelog/hadoop
-    command: hdfs secondarynamenode
-    ports:
-        - "50090:50090"
-    links:
-        - namenode:hdfs-namenode
+    secondarynamenode:
+        image: cfournie/oozie
+        command: hdfs secondarynamenode
+        ports:
+            - "50090:50090"
+        links:
+            - namenode:hdfs-namenode
+        depends_on:
+          - namenode
 
-yarn:
-    image: gelog/hadoop
-    command: /usr/local/bin/start-yarn.sh
-    ports:
-        - "8088:8088"
-        - "8042:8042"
-    links:
-        - datanode:hdfs-datanode1
-        - namenode:hdfs-namenode
-    volumes:
-        - $HOME/data/hadoop/hdfs:/data
-    hostname: yarn
+    yarn:
+        image: cfournie/oozie
+        command: /usr/local/bin/start-yarn.sh
+        ports:
+            - "8088:8088"
+            - "8042:8042"
+        links:
+            - datanode:hdfs-datanode1
+            - namenode:hdfs-namenode
+        volumes:
+            - $HOME/data/hadoop/hdfs:/data
+        hostname: yarn
+        depends_on:
+          - datanode
+          - namenode
+
+    history:
+        image: cfournie/oozie
+        command: yarn historyserver
+        ports:
+            - "8188:8188"
+        links:
+            - datanode:hdfs-datanode1
+            - namenode:hdfs-namenode
+        hostname: history
+        depends_on:
+          - yarn
+          - namenode
+          - datanode
+
+    oozie:
+        image: cfournie/oozie
+        command: /usr/local/oozie-4.1.0/bin/oozie-run.sh
+        ports:
+            - "11000:11000"
+        links:
+            - datanode:hdfs-datanode1
+            - namenode:hdfs-namenode
+            - history:history
+            - yarn:yarn
+        hostname: oozie
+        depends_on:
+          - yarn
+          - namenode
+          - datanode
+          - history

@@ -46,6 +46,27 @@ VOLUME /data
 ADD start-yarn.sh /usr/local/bin/start-yarn.sh
 
 
+####################
+# OOZIE
+####################
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y curl zip perl maven && \
+    curl http://archive.apache.org/dist/oozie/4.1.0/oozie-4.1.0.tar.gz -o oozie-4.1.0.tar.gz && \
+    tar -zxf oozie-4.1.0.tar.gz && \
+    sed -i'' -e 's/<hadoop.version>1.1.1<\/hadoop.version>/<hadoop.version>2.3.0<\/hadoop.version>/g' oozie-4.1.0/pom.xml && \
+    perl -0777 -i'' -pe 's/<requireJavaVersion>(?<whitespace>[\s]*)<version>1.6<\/version>/<requireJavaVersion>$+{whitespace}<version>1.7<\/version>/g' oozie-4.1.0/pom.xml && \
+    MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=128m' oozie-4.1.0/bin/mkdistro.sh -P hadoop-2 -DskipTests && \
+    cp -R oozie-4.1.0/distro/target/oozie-4.1.0-distro/oozie-4.1.0 /usr/local/ && \
+    mkdir /usr/local/oozie-4.1.0/libext && \
+    cp -R oozie-4.1.0/hadooplibs/hadoop-2/target/hadooplibs/hadooplib-2.3.0.oozie-4.1.0/* /usr/local/oozie-4.1.0/libext/ && \
+    rm -rf oozie-4.1.0* && \
+    curl http://archive.cloudera.com/gplextras/misc/ext-2.2.zip -o /usr/local/oozie-4.1.0/libext/ext-2.2.zip && \
+    /usr/local/oozie-4.1.0/bin/oozie-setup.sh prepare-war && \
+    /usr/local/oozie-4.1.0/bin/ooziedb.sh create -sqlfile oozie.sql -run    
+
+ADD start-oozie.sh /usr/local/bin/start-oozie.sh
+
 
 ####################
 # PORTS
@@ -69,7 +90,15 @@ ADD start-yarn.sh /usr/local/bin/start-yarn.sh
 #	50475 = dfs.datanode.https.address	(HTTPS / Secure UI)
 # HDFS: Secondary NameNode (SNN)
 #	50090 = dfs.secondary.http.address	(HTTP / Checkpoint for NameNode metadata)
-EXPOSE 9000 50070 50010 50020 50075 50090
+# YARN: ResourceManager:
+#    8088 = yarn.resourcemanager.webapp.address
+# YARN: NodeManager:
+#    8042 = yarn.nodemanager.webapp.address
+# HISTORY: 
+#   8188 = yarn.timeline-service.webapp.address
+# OOZIE: Oozie:
+#   11000 = OOZIE_HTTP_PORT in oozie-env.sh
+EXPOSE 9000 50070 50010 50020 50075 50090 8088 8042 8188 11000
 
 
 
