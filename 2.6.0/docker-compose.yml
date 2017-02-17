@@ -29,6 +29,19 @@ services:
         depends_on:
           - namenode
 
+    httpfs:
+        image: cfournie/oozie
+        command: /usr/local/hadoop/sbin/httpfs.sh run
+        ports:
+            - "14000:14000"
+        links:
+            - datanode:hdfs-datanode1
+            - namenode:hdfs-namenode
+        hostname: httpfs
+        depends_on:
+          - namenode
+          - datanode
+
     yarn:
         image: cfournie/oozie
         command: /usr/local/bin/start-yarn.sh

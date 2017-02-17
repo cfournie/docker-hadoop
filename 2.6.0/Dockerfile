@@ -90,6 +90,9 @@ ADD start-oozie.sh /usr/local/bin/start-oozie.sh
 #	50475 = dfs.datanode.https.address	(HTTPS / Secure UI)
 # HDFS: Secondary NameNode (SNN)
 #	50090 = dfs.secondary.http.address	(HTTP / Checkpoint for NameNode metadata)
+# HDFS: HttpFS
+#   14000 = conf/httpfs-env.sh's HTTPFS_HTTP_PORT
+#   14001 = conf/httpfs-env.sh's HTTPFS_ADMIN_PORT
 # YARN: ResourceManager:
 #    8088 = yarn.resourcemanager.webapp.address
 # YARN: NodeManager:
@@ -98,7 +101,7 @@ ADD start-oozie.sh /usr/local/bin/start-oozie.sh
 #   8188 = yarn.timeline-service.webapp.address
 # OOZIE: Oozie:
 #   11000 = OOZIE_HTTP_PORT in oozie-env.sh
-EXPOSE 9000 50070 50010 50020 50075 50090 8088 8042 8188 11000
+EXPOSE 9000 50070 50010 50020 50075 50090 14000 14001 8088 8042 8188 11000
 
 
 
