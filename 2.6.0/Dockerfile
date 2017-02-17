@@ -94,7 +94,7 @@ ADD start-oozie.sh /usr/local/bin/start-oozie.sh
 #    8088 = yarn.resourcemanager.webapp.address
 # YARN: NodeManager:
 #    8042 = yarn.nodemanager.webapp.address
-# HISTORY: 
+# YARN: HistoryServer
 #   8188 = yarn.timeline-service.webapp.address
 # OOZIE: Oozie:
 #   11000 = OOZIE_HTTP_PORT in oozie-env.sh
