@@ -23,10 +23,14 @@
 </property>
 <property>
  <name>yarn.resourcemanager.hostname</name>
- <value>yarn</value>
+ <value>resourcemanager</value>
 </property>
 <property>
  <name>yarn.nodemanager.hostname</name>
- <value>yarn</value>
+ <value>nodemanager</value>
+</property>
+<property>
+ <name>yarn.log-aggregation-enable</name>
+ <value>true</value>
 </property>
 </configuration>

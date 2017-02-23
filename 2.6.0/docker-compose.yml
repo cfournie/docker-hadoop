@@ -42,49 +42,70 @@ services:
           - namenode
           - datanode
 
-    yarn:
+    resourcemanager:
         image: cfournie/oozie
-        command: /usr/local/bin/start-yarn.sh
+        command: yarn resourcemanager
         ports:
             - "8088:8088"
-            - "8042:8042"
         links:
             - datanode:hdfs-datanode1
             - namenode:hdfs-namenode
         volumes:
             - $HOME/data/hadoop/hdfs:/data
-        hostname: yarn
+        hostname: resourcemanager
         depends_on:
           - datanode
           - namenode
 
-    history:
+    nodemanager:
         image: cfournie/oozie
-        command: yarn historyserver
+        command: yarn nodemanager
         ports:
-            - "8188:8188"
+            - "8042:8042"
+        links:
+            - resourcemanager:resourcemanager
+            - datanode:hdfs-datanode1
+            - namenode:hdfs-namenode
+        volumes:
+            - $HOME/data/hadoop/hdfs:/data
+        hostname: nodemanager
+        depends_on:
+          - datanode
+          - namenode
+          - resourcemanager
+          
+    jobhistory:
+        image: cfournie/oozie
+        command: /usr/local/hadoop/bin/mapred --config /usr/local/hadoop/etc/hadoop historyserver
+        ports:
+          - "19888:19888"
         links:
             - datanode:hdfs-datanode1
             - namenode:hdfs-namenode
-        hostname: history
+            - nodemanager:nodemanager
+            - resourcemanager:resourcemanager
+        hostname: jobhistory
         depends_on:
-          - yarn
+          - resourcemanager
+          - nodemanager
           - namenode
-          - datanode
-
+          - datanode        
+          
     oozie:
         image: cfournie/oozie
-        command: /usr/local/oozie-4.1.0/bin/oozie-run.sh
+        command: /usr/local/bin/start-oozie.sh
         ports:
             - "11000:11000"
         links:
             - datanode:hdfs-datanode1
             - namenode:hdfs-namenode
-            - history:history
-            - yarn:yarn
+            - jobhistory:jobhistory
+            - nodemanager:nodemanager
+            - resourcemanager:resourcemanager
         hostname: oozie
         depends_on:
-          - yarn
+          - resourcemanager
+          - nodemanager
           - namenode
           - datanode
-          - history
+          - jobhistory
